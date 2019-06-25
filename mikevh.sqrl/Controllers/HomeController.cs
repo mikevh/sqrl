@@ -12,12 +12,12 @@ namespace mikevh.sqrl.Controllers
     {
         public IActionResult Index()
         {
-            return View();
-        }
+            var model = new IndexVM
+            {
+                SQRLLoginLink = $"sqrl://{Request.Host}/{SQRL.LoginLink}"
+            };
 
-        public IActionResult Privacy()
-        {
-            return View();
+            return View(model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -25,5 +25,10 @@ namespace mikevh.sqrl.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+    }
+
+    public class IndexVM
+    {
+        public string SQRLLoginLink { get; set; }
     }
 }
