@@ -41,6 +41,7 @@ namespace mikevh.sqrl
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddScoped<IUserRepo, UserRepo>();
+            services.AddMemoryCache();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -54,6 +55,7 @@ namespace mikevh.sqrl
                 app.UseExceptionHandler("/Home/Error");
             }
             //app.UseSQRL();
+            
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseMvc(routes =>

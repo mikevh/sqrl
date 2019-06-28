@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -10,14 +11,51 @@ namespace mikevh.sqrl
 {
     public static class SQRL
     {
-        public static string LoginLink => "sqrl/auth?nut=" + MakeNut();
+        private static uint _nutCounter = 0;
 
-        public static string MakeNut()
+        public static string MakeNut(string ipaddress, bool isURLClick = true)
         {
             var bytes = new byte[16];
             new RNGCryptoServiceProvider().GetBytes(bytes);
 
+            var ipBytes = System.Net.IPAddress.Parse(ipaddress).GetAddressBytes();
+            for(var i=0; i< ipBytes.Length; i++)
+            {
+                bytes[i] = ipBytes[i];
+            }
+
+            var time = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            var timeBytes = BitConverter.GetBytes(time);
+            for(var i=0; i<timeBytes.Length; i++)
+            {
+                bytes[i + 4] = timeBytes[i];
+            }
+
+            var counterBytes = BitConverter.GetBytes(_nutCounter++);
+            for(var i=0; i<counterBytes.Length; i++)
+            {
+                bytes[i + 8] = counterBytes[i];
+            }
+
+            // todo: set the last bit based on isURLClick
+            
             return ToBase64URLWithoutPadding(bytes);
+        }
+
+        public static string LoginLink(string ipaddress, bool isURLClick = true) => "sqrl/auth?nut=" + MakeNut(ipaddress, isURLClick);
+
+        public static bool ValidateNut(string requestIP, string nut)
+        {
+            var decodedNutBytes = FromBase64URLWithoutPadding(nut);
+            var currentIPBytes = System.Net.IPAddress.Parse(requestIP).GetAddressBytes();
+            for(var i=0; i<currentIPBytes.Length; i++)
+            {
+                if(decodedNutBytes[i] != currentIPBytes[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public static Dictionary<string,string> FormURLDecodeParameterList(string input) => Unpack(Encoding.UTF8.GetString(FromBase64URLWithoutPadding(input)));
@@ -61,8 +99,6 @@ namespace mikevh.sqrl
         {
             return PublicKeyAuth.VerifyDetached(signature, Encoding.UTF8.GetBytes(client + server), key);
         }
-
-        public static string URLSafeBase64(string input) => input.TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
         [Flags]
         public enum TIF : int

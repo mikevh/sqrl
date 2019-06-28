@@ -11,11 +11,13 @@ namespace mikevh.sqrl.Controllers
 {
     public class HomeController : Controller
     {
+        private string RequestIP => Request.IsHttps ? Request.Host.Host == "localhost" ? "127.0.0.1" : Request.Host.Host : "0.0.0.0";
+
         public IActionResult Index()
         {
             var model = new IndexVM
             {
-                SQRLLoginLink = $"sqrl://{Request.Host}/{SQRL.LoginLink}"
+                SQRLLoginLink = $"sqrl://{Request.Host}/{SQRL.LoginLink(RequestIP)}"
             };
 
             return View(model);
