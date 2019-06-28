@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using mikevh.sqrl.Repos;
 using Newtonsoft.Json;
 
 namespace mikevh.sqrl.Controllers
@@ -46,8 +47,13 @@ namespace mikevh.sqrl.Controllers
         public IActionResult Auth(AuthVM auth, string nut)
         {
             var client = SQRL.FormURLDecodeParameterList(auth.Client);
+
+            client.TryGetValue("idk", out var idk);
+            client.TryGetValue("suk", out var suk);
+            client.TryGetValue("vuk", out var vuk);
+
             var signature = SQRL.FromBase64URLWithoutPadding(auth.Ids);
-            var key = SQRL.FromBase64URLWithoutPadding(client["idk"]);
+            var key = SQRL.FromBase64URLWithoutPadding(idk);
             var valid = SQRL.ValidateSQRLPost(signature, auth.Client, auth.Server, key);
             
             if(!valid) {
@@ -60,9 +66,9 @@ namespace mikevh.sqrl.Controllers
             switch (client["cmd"])
             {
                 case "query":
-                    return Query(client["idk"]);
+                    return Query(idk);
                 case "ident":
-                    return Ident(client["idk"], client["suk"], client["vuk"]);
+                    return Ident(idk, suk, vuk);
                 default:
                     return Unauthorized();
             }
@@ -75,23 +81,14 @@ namespace mikevh.sqrl.Controllers
 
             var known = _users.ContainsKey(idk);
             var qry = "/sqrl/auth?nut=" + n;
-
-            if (known)
-            {
-                var user = _users[idk];
-                _loggedInNuts.Add(n, user);
-                qry = "/sqrl/loggedin?nut=" + n;
-            }
-
-            var tif = known ? SQRL.TIF.id_match.ToString("X").TrimStart('0') : "0";
-
-            var rv = $"ver=1\r\nnut={n}\r\ntif={tif}\r\nqry={qry}\r\n";
-
-            rv = SQRL.ToBase64URLWithoutPadding(Encoding.UTF8.GetBytes(rv));
+            var tif = known ? "5" : "4";
 
             Console.WriteLine("QUERY RESPONSE");
+            var rv = $"ver=1\r\nnut={n}\r\ntif={tif}\r\nqry={qry}\r\n";
             Console.WriteLine(rv);
 
+            rv = SQRL.ToBase64URLWithoutPadding(Encoding.UTF8.GetBytes(rv));
+            
             return new ContentResult { Content = rv, StatusCode = 200, ContentType = "application/x-www-form-urlencoded" };
         }
 
@@ -146,13 +143,6 @@ namespace mikevh.sqrl.Controllers
             await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-    }
-
-    public class User
-    {
-        public string idk { get; set; }
-        public string suk { get; set; }
-        public string vuk { get; set; }
     }
 
     public class AuthVM
