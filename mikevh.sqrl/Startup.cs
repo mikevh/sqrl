@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using mikevh.sqrl.Repos;
 
 namespace mikevh.sqrl
 {
@@ -39,6 +40,7 @@ namespace mikevh.sqrl
                 o.LogoutPath = "/home/logout";
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddScoped<IUserRepo, UserRepo>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -14,33 +14,12 @@ namespace mikevh.sqrl.Controllers
 {
     public class SQRLController : Controller
     {
-        static Dictionary<string, User> _users = new Dictionary<string, User>();
+        private readonly IUserRepo _users;
         static Dictionary<string, User> _loggedInNuts = new Dictionary<string, User>();
-        public IActionResult See(string input = "")
+
+        public SQRLController(IUserRepo users)
         {
-            try
-            {
-                var split = input
-                    .Trim()
-                    .Split('&', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x =>
-                    {
-                        var line = x.Split('=', StringSplitOptions.RemoveEmptyEntries);
-                        var rv = new KeyValuePair<string, string>(
-                            line[0],
-                            Encoding.UTF8.GetString(SQRL.FromBase64URLWithoutPadding(line[1]))
-                        );
-
-                        return rv;
-                    }).ToList();
-                input = JsonConvert.SerializeObject(split, Formatting.Indented);
-            }
-            catch
-            {
-                input = "Error decoding";
-            }
-
-            return View(nameof(See), input);
+            _users = users;
         }
 
         [HttpPost]
@@ -79,9 +58,9 @@ namespace mikevh.sqrl.Controllers
             Console.WriteLine("QUERY");
             var n = SQRL.MakeNut();
 
-            var known = _users.ContainsKey(idk);
+            var user = _users.Get(idk);
             var qry = "/sqrl/auth?nut=" + n;
-            var tif = known ? "5" : "4";
+            var tif = user == null ? "4" : "5";
 
             Console.WriteLine("QUERY RESPONSE");
             var rv = $"ver=1\r\nnut={n}\r\ntif={tif}\r\nqry={qry}\r\n";
@@ -96,18 +75,20 @@ namespace mikevh.sqrl.Controllers
         {
             Console.WriteLine("IDENT");
 
-            if (!_users.ContainsKey(idk))
+            var user = _users.Get(idk);
+
+            if (user == null)
             {
                 Console.WriteLine("adding user " + idk);
-                _users.Add(idk, new User
+                user = new User
                 {
                     idk = idk,
                     suk = suk,
                     vuk = vuk
-                });
+                };
+                _users.Add(user);
             }
             var n = SQRL.MakeNut();
-            var user = _users[idk];
             _loggedInNuts.Add(n, user);
 
             var rv = $"ver=1\r\nnut={n}\r\ntif=4\r\nqry=/sqrl/auth?nut={n}\r\nurl={Request.Scheme}://{Request.Host}/sqrl/loggedin?nut={n}\r\n";
@@ -142,6 +123,33 @@ namespace mikevh.sqrl.Controllers
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult See(string input = "")
+        {
+            try
+            {
+                var split = input
+                    .Trim()
+                    .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x =>
+                    {
+                        var line = x.Split('=', StringSplitOptions.RemoveEmptyEntries);
+                        var rv = new KeyValuePair<string, string>(
+                            line[0],
+                            Encoding.UTF8.GetString(SQRL.FromBase64URLWithoutPadding(line[1]))
+                        );
+
+                        return rv;
+                    }).ToList();
+                input = JsonConvert.SerializeObject(split, Formatting.Indented);
+            }
+            catch
+            {
+                input = "Error decoding";
+            }
+
+            return View(nameof(See), input);
         }
     }
 
