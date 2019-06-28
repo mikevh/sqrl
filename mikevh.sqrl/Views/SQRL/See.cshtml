@@ -1,0 +1,14 @@
+﻿@model string
+
+@if (!string.IsNullOrEmpty(Model))
+{
+    <pre>@Model</pre>
+}
+
+@using (Html.BeginForm("View"))
+{
+    <textarea name="input" rows="10" style="width: 100%">
+
+    </textarea>
+    <input type="submit" value="View" />
+}

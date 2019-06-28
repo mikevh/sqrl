@@ -5,5 +5,9 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Login <a href="@Model.SQRLLoginLink">Login</a></p>
+    <p>Login <a href="@Model.SQRLLoginLink" encoded-sqrl-url="@Model.EncodedSQRLURL" onclick="sqrlLinkClick(this); return true;" >Login</a></p>
 </div>
+
+@section Scripts {
+<script src="~/js/sqrl.js"></script>
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using mikevh.sqrl.Models;
 
@@ -20,6 +21,12 @@ namespace mikevh.sqrl.Controllers
             return View(model);
         }
 
+        [Authorize]
+        public IActionResult Hello()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -30,5 +37,6 @@ namespace mikevh.sqrl.Controllers
     public class IndexVM
     {
         public string SQRLLoginLink { get; set; }
+        public string EncodedSQRLURL => Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(SQRLLoginLink));
     }
 }

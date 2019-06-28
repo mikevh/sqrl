@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +28,16 @@ namespace mikevh.sqrl
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(o =>
+            {
+                o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(o =>
+            {
+                o.LoginPath = "/home/index";
+                o.LogoutPath = "/home/logout";
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -40,9 +51,9 @@ namespace mikevh.sqrl
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-            app.UseSQRL();
+            //app.UseSQRL();
             app.UseStaticFiles();
-            
+            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -52,66 +63,66 @@ namespace mikevh.sqrl
         }
     }
 
-    public static class SqrlExtension
-    {
-        public static IApplicationBuilder UseSQRL(this IApplicationBuilder b) => UseSQRL(b, o => { });
-        public static IApplicationBuilder UseSQRL(this IApplicationBuilder b, Action<SQRLOptions> options) => b.UseMiddleware<SQRLMiddleware>(options());
+    //public static class SqrlExtension
+    //{
+    //    public static IApplicationBuilder UseSQRL(this IApplicationBuilder b) => UseSQRL(b, o => { });
+    //    public static IApplicationBuilder UseSQRL(this IApplicationBuilder b, Action<SQRLOptions> options) => b.UseMiddleware<SQRLMiddleware>(options());
 
-        private static readonly RouteData EmptyRouteData = new RouteData();
+    //    private static readonly RouteData EmptyRouteData = new RouteData();
 
-        private static readonly ActionDescriptor EmptyActionDescriptor = new ActionDescriptor();
+    //    private static readonly ActionDescriptor EmptyActionDescriptor = new ActionDescriptor();
 
-        public static Task WriteResultAsync<T>(this HttpContext ctx, T result) where T : IActionResult
-        { 
-            if(ctx == null)
-            {
-                throw new ArgumentNullException(nameof(ctx));
-            }
+    //    public static Task WriteResultAsync<T>(this HttpContext ctx, T result) where T : IActionResult
+    //    { 
+    //        if(ctx == null)
+    //        {
+    //            throw new ArgumentNullException(nameof(ctx));
+    //        }
 
-            var ex = ctx.RequestServices.GetService<IActionResultExecutor<T>>();
+    //        var ex = ctx.RequestServices.GetService<IActionResultExecutor<T>>();
 
-            if(ex == null)
-            {
-                throw new InvalidOperationException($"No result executor for '{typeof(T).FullName}'");
-            }
+    //        if(ex == null)
+    //        {
+    //            throw new InvalidOperationException($"No result executor for '{typeof(T).FullName}'");
+    //        }
 
-            var routeData = ctx.GetRouteData() ?? EmptyRouteData;
-            var actionCtx = new ActionContext(ctx, routeData, EmptyActionDescriptor);
-            return ex.ExecuteAsync(actionCtx, result);
-        }
-    }
+    //        var routeData = ctx.GetRouteData() ?? EmptyRouteData;
+    //        var actionCtx = new ActionContext(ctx, routeData, EmptyActionDescriptor);
+    //        return ex.ExecuteAsync(actionCtx, result);
+    //    }
+    //}
 
     public class SQRLOptions
     {
         public string Path { get; set; } = "/sqrl/auth";
     }
 
-    public class SQRLMiddleware
-    {
-        private readonly RequestDelegate _next;
-        private readonly SQRLOptions _options;
+    //public class SQRLMiddleware
+    //{
+    //    private readonly RequestDelegate _next;
+    //    private readonly SQRLOptions _options;
 
-        public SQRLMiddleware(RequestDelegate next, SQRLOptions options = null)
-        {
-            _options = options ?? new SQRLOptions();
-            _next = next;
-        }
+    //    public SQRLMiddleware(RequestDelegate next, SQRLOptions options = null)
+    //    {
+    //        _options = options ?? new SQRLOptions();
+    //        _next = next;
+    //    }
 
-        public async Task InvokeAsync(HttpContext ctx)
-        {
-            if(ctx.Request.Path == _options.Path && ctx.Request.Method == HttpMethods.Post)
-            {
-                var r = new ContentResult
-                {
-                    Content = "foo",
-                    ContentType = "text/plain", // todo: what should this be
-                    StatusCode = StatusCodes.Status200OK
-                };
+    //    public async Task InvokeAsync(HttpContext ctx)
+    //    {
+    //        if(ctx.Request.Path == _options.Path && ctx.Request.Method == HttpMethods.Post)
+    //        {
+    //            var r = new ContentResult
+    //            {
+    //                Content = "foo",
+    //                ContentType = "text/plain", // todo: what should this be
+    //                StatusCode = StatusCodes.Status200OK
+    //            };
 
-                await ctx.WriteResultAsync(r);
-            }
+    //            await ctx.WriteResultAsync(r);
+    //        }
 
-            await _next(ctx);
-        }
-    }
+    //        await _next(ctx);
+    //    }
+    //}
 }
