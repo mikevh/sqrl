@@ -1,5 +1,19 @@
-﻿@{
+﻿@model mikevh.sqrl.Controllers.HelloVM
+<form asp-controller="Home" asp-action="Hello" method="post">
+    <div class="col-md-6 mb-3">
+        <label asp-for="User.Name"></label>
+        <input asp-for="User.Name" />
+    </div>
+    <div class="col-md-6 mb-3">
+        Created On: @Model.User.CreatedOn.ToString("HH:mm:ss MM/dd/yy")<br/>
+        Login Count: @Model.User.LoginCount<br />
+        Last Login On: @Model.User.LastLoggedIn.ToString("HH:mm:ss MM/dd/yy")<br />
+        Update Count: @Model.User.UpdateCount<br/>
+        Last Updated On: @(Model.User.UpdatedOn == default(DateTime) ? "" : Model.User.UpdatedOn.ToString("HH:mm:ss MM/dd/yy"))
+    </div>
+    <div class="col-md-6 mb-3">
+        <button type="submit">Save</button>
+    </div>
 
-}
 
-Hello
+</form>

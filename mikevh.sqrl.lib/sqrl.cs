@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Sodium; 
 
-namespace mikevh.sqrl
+namespace mikevh.sqrl.lib
 {
     public static class SQRL
     {
@@ -18,24 +18,24 @@ namespace mikevh.sqrl
             var bytes = new byte[16];
             new RNGCryptoServiceProvider().GetBytes(bytes);
 
-            var ipBytes = System.Net.IPAddress.Parse(ipaddress).GetAddressBytes();
-            for(var i=0; i< ipBytes.Length; i++)
-            {
-                bytes[i] = ipBytes[i];
-            }
+            //var ipBytes = System.Net.IPAddress.Parse(ipaddress).GetAddressBytes();
+            //for(var i=0; i< ipBytes.Length; i++)
+            //{
+            //    bytes[i] = ipBytes[i];
+            //}
 
-            var time = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var timeBytes = BitConverter.GetBytes(time);
-            for(var i=0; i<timeBytes.Length; i++)
-            {
-                bytes[i + 4] = timeBytes[i];
-            }
+            //var time = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            //var timeBytes = BitConverter.GetBytes(time);
+            //for(var i=0; i<timeBytes.Length; i++)
+            //{
+            //    bytes[i + 4] = timeBytes[i];
+            //}
 
-            var counterBytes = BitConverter.GetBytes(_nutCounter++);
-            for(var i=0; i<counterBytes.Length; i++)
-            {
-                bytes[i + 8] = counterBytes[i];
-            }
+            //var counterBytes = BitConverter.GetBytes(_nutCounter++);
+            //for(var i=0; i<counterBytes.Length; i++)
+            //{
+            //    bytes[i + 8] = counterBytes[i];
+            //}
 
             // todo: set the last bit based on isURLClick
             
@@ -63,7 +63,7 @@ namespace mikevh.sqrl
         public static Dictionary<string,string> Unpack(string input)
         {
             var rv = new Dictionary<string,string>();
-            var list = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            var list = input.Split( new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var s in list)
             {
                 var idx = s.IndexOf('=');

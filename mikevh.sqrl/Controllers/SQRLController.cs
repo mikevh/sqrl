@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using mikevh.sqrl.lib;
 using mikevh.sqrl.Repos;
 
 namespace mikevh.sqrl.Controllers
@@ -83,10 +84,15 @@ namespace mikevh.sqrl.Controllers
                 {
                     idk = idk,
                     suk = suk,
-                    vuk = vuk
+                    vuk = vuk,
+                    CreatedOn = DateTime.Now,
                 };
                 _users.Add(user);
             }
+
+            user.LoginCount++;
+            user.LastLoggedIn = DateTime.Now;
+
             var nut = SQRL.MakeNut(RequestIP);
             _memoryCache.Set(nut, user);
 

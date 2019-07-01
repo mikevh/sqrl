@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using mikevh.sqrl;
+using mikevh.sqrl.lib;
 using NUnit.Framework;
 
 namespace Tests
