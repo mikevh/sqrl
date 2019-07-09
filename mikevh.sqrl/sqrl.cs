@@ -2,44 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using mikevh.sqrl.Repos;
 using Sodium; 
 
 namespace mikevh.sqrl
 {
-    //public interface ISQRLThing
-    //{
-    //    SQRLRequest DecodeRequest(string host, string ipAddress, SQRLVM vm);
-    //    SQRLReponse ComoseResponse(SQRLRequest req, Action<string, string> loggedIn);
-    //}
-
-    //public class SQRLThing : ISQRLThing
-    //{
-    //    private readonly IMemoryCache _memoryCache;
-    //    private readonly ILogger _logger;
-    //    private readonly IUserRepo _userRepo;
-
-    //    public SQRLThing(IMemoryCache memoryCache, ILogger<SQRLThing> logger, IUserRepo userRepo)
-    //    {
-    //        _memoryCache = memoryCache;
-    //        _logger = logger;
-    //        _userRepo = userRepo;
-    //    }
-
-    //    public SQRLRequest DecodeRequest(string host, string ipAddress, SQRLVM vm) => SQRL.DecodeRequest(host, ipAddress, vm);
-
-    //    public SQRLReponse ComoseResponse(SQRLRequest req, Action<string, string> loggedIn)
-    //    {
-    //        return SQRL.ComoseResponse(req, _userRepo.Get, _userRepo.Update, (s, s1) => { });
-    //    }
-    //}
-
     public static class SQRL
     {
         private static uint _nutCounter = 0;

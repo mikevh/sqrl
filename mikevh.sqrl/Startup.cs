@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using mikevh.sqrl.Repos;
 
 namespace mikevh.sqrl
@@ -41,9 +33,9 @@ namespace mikevh.sqrl
                 o.LoginPath = "/home/index";
                 o.LogoutPath = "/home/logout";
             });
-            services.AddSQRL(new SQRLOptions
+            services.AddSQRL(o => 
             {
-                Path = "/sqrl/auth"
+                o.Path = "/sqrl/auth";
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddScoped<IUserRepo, UserRepo>();
@@ -62,7 +54,7 @@ namespace mikevh.sqrl
 
             // call use or add sqrl, pass in action for ident action && url for CPS pickup, give them a cookie,
 
-            //app.UseSQRL();
+            app.UseSQRL();
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseMvc(routes =>
