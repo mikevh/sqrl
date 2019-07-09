@@ -46,7 +46,7 @@ function checkForChange() {
     };
     syncQuery.send(); // initiate the query to the 'sync.txt' object.
 }
-checkForChange();	// launch our background change checking
+//checkForChange();	// launch our background change checking
 
 
 // =============================================================================

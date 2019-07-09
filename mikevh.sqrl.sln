@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mikevh.sqrl", "mikevh.sqrl\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTestProject1", "NUnitTestProject1\NUnitTestProject1.csproj", "{FE00A1CF-3594-445E-82E3-36D5D581E3FE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mikevh.sqrl.lib", "mikevh.sqrl.lib\mikevh.sqrl.lib.csproj", "{F11E921F-6E4B-4513-8792-9C9506D53017}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{FE00A1CF-3594-445E-82E3-36D5D581E3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE00A1CF-3594-445E-82E3-36D5D581E3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE00A1CF-3594-445E-82E3-36D5D581E3FE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F11E921F-6E4B-4513-8792-9C9506D53017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F11E921F-6E4B-4513-8792-9C9506D53017}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F11E921F-6E4B-4513-8792-9C9506D53017}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F11E921F-6E4B-4513-8792-9C9506D53017}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

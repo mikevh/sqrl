@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using mikevh.sqrl.lib;
 using mikevh.sqrl.Models;
 using mikevh.sqrl.Repos;
 
@@ -20,7 +19,6 @@ namespace mikevh.sqrl.Controllers
         {
             _userRepo = userRepo;
         }
-
         
         public IActionResult Index()
         {
@@ -37,7 +35,7 @@ namespace mikevh.sqrl.Controllers
         public IActionResult Hello()
         {
             var idk = User.Claims.First(x => x.Type == "idk").Value;
-            var user = _userRepo.Get(idk);
+            var user = _userRepo.Get(idk) as User;
 
             var vm = new HelloVM
             {
@@ -55,8 +53,9 @@ namespace mikevh.sqrl.Controllers
             var user = _userRepo.Get(idk);
 
             user.Name = vm.User.Name;
-            user.UpdatedOn = DateTime.Now;
             user.UpdateCount++;
+
+            _userRepo.Update(user);
 
             return Hello();
         }
@@ -78,6 +77,6 @@ namespace mikevh.sqrl.Controllers
     public class IndexVM
     {
         public string SQRLLoginLink { get; set; }
-        public string EncodedSQRLURL => SQRL.ToBase64URLWithoutPadding(Encoding.UTF8.GetBytes(SQRLLoginLink));
+        public string EncodedSQRLURL => SQRL.ToBase64URL(SQRLLoginLink.UTF8Bytes());
     }
 }

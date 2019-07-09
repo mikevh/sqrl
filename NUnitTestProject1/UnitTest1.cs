@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
-using mikevh.sqrl.lib;
 using NUnit.Framework;
+using mikevh.sqrl;
 
 namespace Tests
 {
@@ -45,8 +46,8 @@ namespace Tests
             var msg = client + server;
 
             var msgBytes = Encoding.UTF8.GetBytes(msg);
-            var sigBytes = SQRL.FromBase64URLWithoutPadding(ids);
-            var keyBytes = SQRL.FromBase64URLWithoutPadding(idk);
+            var sigBytes = SQRL.FromBase64URL(ids);
+            var keyBytes = SQRL.FromBase64URL(idk);
 
             var result = Sodium.PublicKeyAuth.VerifyDetached(sigBytes, msgBytes, keyBytes);
 
@@ -57,11 +58,11 @@ namespace Tests
         public void Hex_to_tiff()
         {
             var hexValue = "E0";
-            var intVal = (SQRL.TIF)int.Parse(hexValue, System.Globalization.NumberStyles.HexNumber);
+            var intVal = (SQRLReponse.TIF)int.Parse(hexValue, System.Globalization.NumberStyles.HexNumber);
 
-            var hasClientFailure = (intVal & SQRL.TIF.client_failure) != 0;
-            var hasCommandFaild = (intVal & SQRL.TIF.command_failed) != 0;
-            var hasTransientError = (intVal & SQRL.TIF.transient_error) != 0;
+            var hasClientFailure = (intVal & SQRLReponse.TIF.client_failure) != 0;
+            var hasCommandFaild = (intVal & SQRLReponse.TIF.command_failed) != 0;
+            var hasTransientError = (intVal & SQRLReponse.TIF.transient_error) != 0;
 
             Assert.IsTrue(hasClientFailure);
             Assert.IsTrue(hasCommandFaild);
@@ -71,13 +72,24 @@ namespace Tests
         [Test]
         public void TIFF_to_hex()
         {
-            var value = SQRL.TIF.client_failure | SQRL.TIF.command_failed | SQRL.TIF.transient_error;
+            var value = SQRLReponse.TIF.client_failure | SQRLReponse.TIF.command_failed | SQRLReponse.TIF.transient_error;
 
             var hex = value.ToString("X").TrimStart('0');
 
             Assert.AreEqual("E0", hex);
         }
 
+        [Test]
+        public void EmptyQryParamthrows()
+        {
+            var resp = new SQRLReponse();
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                resp.Serialize();
+            });
+        }
+        
         class TestClass1
         {
             public string a { get; set; }
@@ -88,7 +100,7 @@ namespace Tests
         public void FromBase64URLWithoutPadding_2_equals_padding_needed()
         {
             var input = "YQ";
-            var result = SQRL.FromBase64URLWithoutPadding(input);
+            var result = SQRL.FromBase64URL(input);
 
             Assert.AreEqual("a", result);
         }
@@ -98,7 +110,7 @@ namespace Tests
         {
             var input = "YWI";
 
-            var result = SQRL.FromBase64URLWithoutPadding(input);
+            var result = SQRL.FromBase64URL(input);
 
             Assert.AreEqual("ab", result);
         }
@@ -108,7 +120,7 @@ namespace Tests
         {
             var input = "YWJj";
 
-            var result = SQRL.FromBase64URLWithoutPadding(input);
+            var result = SQRL.FromBase64URL(input);
 
             Assert.AreEqual("abc", result);
         }

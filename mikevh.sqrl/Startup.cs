@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using mikevh.sqrl.Repos;
 
 namespace mikevh.sqrl
@@ -39,9 +41,12 @@ namespace mikevh.sqrl
                 o.LoginPath = "/home/index";
                 o.LogoutPath = "/home/logout";
             });
+            services.AddSQRL(new SQRLOptions
+            {
+                Path = "/sqrl/auth"
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddScoped<IUserRepo, UserRepo>();
-            services.AddMemoryCache();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -54,8 +59,10 @@ namespace mikevh.sqrl
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            // call use or add sqrl, pass in action for ident action && url for CPS pickup, give them a cookie,
+
             //app.UseSQRL();
-            
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseMvc(routes =>
@@ -66,67 +73,4 @@ namespace mikevh.sqrl
             });
         }
     }
-
-    //public static class SqrlExtension
-    //{
-    //    public static IApplicationBuilder UseSQRL(this IApplicationBuilder b) => UseSQRL(b, o => { });
-    //    public static IApplicationBuilder UseSQRL(this IApplicationBuilder b, Action<SQRLOptions> options) => b.UseMiddleware<SQRLMiddleware>(options());
-
-    //    private static readonly RouteData EmptyRouteData = new RouteData();
-
-    //    private static readonly ActionDescriptor EmptyActionDescriptor = new ActionDescriptor();
-
-    //    public static Task WriteResultAsync<T>(this HttpContext ctx, T result) where T : IActionResult
-    //    { 
-    //        if(ctx == null)
-    //        {
-    //            throw new ArgumentNullException(nameof(ctx));
-    //        }
-
-    //        var ex = ctx.RequestServices.GetService<IActionResultExecutor<T>>();
-
-    //        if(ex == null)
-    //        {
-    //            throw new InvalidOperationException($"No result executor for '{typeof(T).FullName}'");
-    //        }
-
-    //        var routeData = ctx.GetRouteData() ?? EmptyRouteData;
-    //        var actionCtx = new ActionContext(ctx, routeData, EmptyActionDescriptor);
-    //        return ex.ExecuteAsync(actionCtx, result);
-    //    }
-    //}
-
-    public class SQRLOptions
-    {
-        public string Path { get; set; } = "/sqrl/auth";
-    }
-
-    //public class SQRLMiddleware
-    //{
-    //    private readonly RequestDelegate _next;
-    //    private readonly SQRLOptions _options;
-
-    //    public SQRLMiddleware(RequestDelegate next, SQRLOptions options = null)
-    //    {
-    //        _options = options ?? new SQRLOptions();
-    //        _next = next;
-    //    }
-
-    //    public async Task InvokeAsync(HttpContext ctx)
-    //    {
-    //        if(ctx.Request.Path == _options.Path && ctx.Request.Method == HttpMethods.Post)
-    //        {
-    //            var r = new ContentResult
-    //            {
-    //                Content = "foo",
-    //                ContentType = "text/plain", // todo: what should this be
-    //                StatusCode = StatusCodes.Status200OK
-    //            };
-
-    //            await ctx.WriteResultAsync(r);
-    //        }
-
-    //        await _next(ctx);
-    //    }
-    //}
 }

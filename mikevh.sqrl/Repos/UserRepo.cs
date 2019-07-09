@@ -6,45 +6,30 @@ using System.Threading.Tasks;
 
 namespace mikevh.sqrl.Repos
 {
-    public class User
-    {
-        public string idk { get; set; }
-        public string suk { get; set; }
-        public string vuk { get; set; }
-
-        public string Name { get; set; }
-        public DateTime CreatedOn { get; set; }
-        public DateTime UpdatedOn { get; set; }
-        public DateTime LastLoggedIn { get; set; }
-        public int LoginCount { get; set; }
-        public int UpdateCount { get; set; }
-    }
-
-    public interface IUserRepo
-    {
-        User Get(string idk);
-        void Update(User user);
-        void Add(User user);
-        bool Remove(User user);
-    }
-
     public class UserRepo : IUserRepo
     {
-        private readonly static Dictionary<string, User> _store = new Dictionary<string, User>();
+        private static readonly Dictionary<string, User> _store = new Dictionary<string, User>();
 
         public void Add(User user)
         {
-            if(!_store.ContainsKey(user.idk))
-            {
-                _store.Add(user.idk, user);
-            }
+            user.LoginCount = 1;
+            _store.Add(user.idk, user);
         }
 
         public void Update(User user)
         {
-            if(_store.TryGetValue(user.idk, out var storedUser))
+            if(!_store.TryGetValue(user.idk, out var existing))
             {
-                // todo: update props
+                Add(user);
+            }
+            else
+            {
+                existing.LastLoggedIn = user.LastLoggedIn;
+                existing.LoginCount = user.LoginCount;
+                existing.Name = user.Name;
+                existing.UpdatedOn = DateTime.Now;
+                existing.suk = user.suk;
+                existing.vuk = user.vuk;
             }
         }
 
@@ -56,12 +41,8 @@ namespace mikevh.sqrl.Repos
 
         public bool Remove(User user)
         {
-            if(_store.ContainsKey(user.idk))
-            {
-                _store.Remove(user.idk);
-                return true;
-            }
-            return false;
+            _store.Remove(user.idk);
+            return true;
         }
     }
 }
