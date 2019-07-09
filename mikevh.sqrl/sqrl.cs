@@ -163,7 +163,6 @@ namespace mikevh.sqrl
                     loggedIn("CPS" + resp.nut, user);
 
                     resp.tif = (SQRLReponse.TIF.id_match | SQRLReponse.TIF.ips_match).ToHex();
-                    resp.url = $"https://{req.Host}/account/cps?nut={resp.nut}";
                     
                     return resp;
                 default:

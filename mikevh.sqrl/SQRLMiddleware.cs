@@ -7,14 +7,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using mikevh.sqrl.Repos;
 
 namespace mikevh.sqrl
 {
     public static class SQRLExtension
     {
-        public static void AddSQRL(this IServiceCollection services, Action<SQRLOptions> options = null)
+        public static void AddSQRL(this IServiceCollection services, Action<SQRLOptions> options)
         {
             var sqrlOptions = new SQRLOptions();
             options?.Invoke(sqrlOptions);
@@ -33,7 +32,8 @@ namespace mikevh.sqrl
 
     public class SQRLOptions
     {
-        public string Path { get; set; } = "/sqrl/auth";
+        public string LoginPath { get; set; } = "/sqrl/auth";
+        public Func<HttpContext,string,string> CPSPath { get; set; }
     }
 
     public class SQRLMiddleware
@@ -49,7 +49,7 @@ namespace mikevh.sqrl
         {
             var options = ctx.RequestServices.GetService<SQRLOptions>() ?? new SQRLOptions();
 
-            if (ctx.Request.Path != options.Path || ctx.Request.Method != HttpMethods.Post || !ctx.Request.IsHttps)
+            if (ctx.Request.Path != options.LoginPath || ctx.Request.Method != HttpMethods.Post || !ctx.Request.IsHttps)
             {
                 await _next(ctx);
                 return;
@@ -65,7 +65,6 @@ namespace mikevh.sqrl
                 Ids = ctx.Request.Form["ids"],
                 Server = ctx.Request.Form["server"]
             };
-            var nut = ctx.Request.Query["nut"];
 
             var req = SQRL.DecodeRequest(ctx.Request.Host.Value, RequestIP(), auth);
             var res = SQRL.ComoseResponse(req, userRepo.Get, userRepo.Update, (key, user) =>
@@ -73,13 +72,18 @@ namespace mikevh.sqrl
                 cache.Set(key, user);
             });
 
+            if(req.cmd != "query")
+            {
+                res.url = options.CPSPath(ctx, res.nut);
+            }
+
+            var rv = res.Serialize();
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "application/x-www-form-urlencoded";
-            var rv = res.Serialize();
             ctx.Response.ContentLength = rv.Length;
             await ctx.Response.WriteAsync(rv);
 
-            string RequestIP() => ctx.Request.IsHttps? ctx.Request.Host.Host == "localhost" ? "127.0.0.1" : ctx.Request.Host.Host : "0.0.0.0";
+            string RequestIP() => ctx.Request.IsHttps ? ctx.Request.Host.Host == "localhost" ? "127.0.0.1" : ctx.Request.Host.Host : "0.0.0.0";
         }
     }
 }

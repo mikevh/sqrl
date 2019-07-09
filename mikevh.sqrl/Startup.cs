@@ -35,7 +35,8 @@ namespace mikevh.sqrl
             });
             services.AddSQRL(o => 
             {
-                o.Path = "/sqrl/auth";
+                o.LoginPath = "/sqrl/auth";
+                o.CPSPath = (ctx, nut) => $"{ctx.Request.Scheme}://{ctx.Request.Host.Value}/account/CPS?nut={nut}";
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddScoped<IUserRepo, UserRepo>();
