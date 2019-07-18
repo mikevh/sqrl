@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using Dapper;
+using Dapper.Contrib.Extensions;
 
 namespace mikevh.sqrl.Repos
 {
     public class User
     {
+        [ExplicitKey]
         public string idk { get; set; }
         public string suk { get; set; }
         public string vuk { get; set; }
@@ -15,53 +20,51 @@ namespace mikevh.sqrl.Repos
         public DateTime LastLoggedIn { get; set; }
         public int LoginCount { get; set; }
         public int UpdateCount { get; set; }
+        
+        /*
+CREATE TABLE Users (
+	idk varchar(43) not null primary key,
+	suk varchar(43) not null,
+	vuk varchar(43) not null,
+	Name nvarchar(255) null,
+	CreatedOn DATETIME2 not null,
+	UpdatedOn DATETIME2 not null,
+	LastLoggedIn DATETIME2 not null,
+	LoginCount INT not null,
+	UpdateCount INT not null
+)
+         */
     }
 
     public interface IUserRepo
     {
         User Get(string idk);
-        void Update(User user);
+        bool Update(User user);
         void Add(User user);
         bool Remove(User user);
     }
 
-    public class UserRepo : IUserRepo
+    public class UserRepo : IUserRepo, IDisposable
     {
-        private static readonly Dictionary<string, User> _store = new Dictionary<string, User>();
+        private readonly string _connectionString;
 
-        public void Add(User user)
+        public UserRepo(string connectionString)
         {
-            user.LoginCount = 1;
-            _store.Add(user.idk, user);
+            _connectionString = connectionString;
+            SqlMapper.AddTypeMap(typeof(DateTime), DbType.DateTime2);
         }
 
-        public void Update(User user)
-        {
-            if (!_store.TryGetValue(user.idk, out var existing))
-            {
-                Add(user);
-            }
-            else
-            {
-                existing.LastLoggedIn = user.LastLoggedIn;
-                existing.LoginCount = user.LoginCount;
-                existing.Name = user.Name;
-                existing.UpdatedOn = DateTime.Now;
-                existing.suk = user.suk;
-                existing.vuk = user.vuk;
-            }
-        }
+        private SqlConnection _connection;
+        private SqlConnection Connection => _connection = _connection ?? new SqlConnection(_connectionString);
 
-        public User Get(string idk)
-        {
-            _store.TryGetValue(idk, out var user);
-            return user;
-        }
+        public void Add(User user) => Connection.Insert(user);
 
-        public bool Remove(User user)
-        {
-            _store.Remove(user.idk);
-            return true;
-        }
+        public bool Update(User user) => Connection.Update(user);
+
+        public User Get(string idk) => Connection.Get<User>(idk);
+
+        public bool Remove(User user) => Connection.Delete(user);
+
+        public void Dispose() => _connection?.Dispose();
     }
 }

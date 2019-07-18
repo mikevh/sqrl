@@ -29,7 +29,7 @@ namespace mikevh.sqrl.Controllers
         {
             _logger.LogTrace("logging IN WITH NUT " + nut);
             var cpsKey = "CPS" + nut;
-            _memoryCache.TryGetValue(cpsKey, out User user);
+            _memoryCache.TryGetValue(cpsKey, out User user); // todo: add this key with a timeout
 
             if (user == null)
             {
@@ -44,9 +44,6 @@ namespace mikevh.sqrl.Controllers
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(principal);
-
-            // todo: how to get the sqrloption url after login?
-            // application level issue
 
             return RedirectToAction("Hello", "Home");
         }

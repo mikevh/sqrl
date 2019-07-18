@@ -1,4 +1,6 @@
-﻿namespace mikevh.sqrl
+﻿using System.Collections.Generic;
+
+namespace mikevh.sqrl
 {
     public class SQRLRequest
     {
@@ -23,15 +25,8 @@
         public bool IsValid { get; set; }
         public string RequestIP { get; set; }
         public string Host { get; set; }
-
-
-        public enum Options
-        {
-            noiptest,
-            sqrlonly,
-            hardlock,
-            cps,
-            suk
-        }
+        
+        public SQRLReponse Server { get; set; }
+        public string ServerURL { get; set; }
     }
 }

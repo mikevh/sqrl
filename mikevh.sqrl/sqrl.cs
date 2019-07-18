@@ -66,6 +66,7 @@ namespace mikevh.sqrl
                 suk = dict.GetOrDefault("suk"),
                 vuk = dict.GetOrDefault("vuk"),
                 cmd = dict.GetOrDefault("cmd"),
+                opt = dict.GetOrDefault("opt"),
 
                 Signature = FromBase64URL(vm.Ids),
             };
@@ -74,6 +75,24 @@ namespace mikevh.sqrl
             rv.IsValid = ValidateSQRLPost(rv.Signature, vm.Client, vm.Server, rv.PublicKey);
             rv.RequestIP = ipAddress;
             rv.Host = host;
+
+            var server = FromBase64URL(vm.Server).UTF8String();
+            if(server.StartsWith("sqrl://"))
+            {
+                rv.ServerURL = server;
+            }
+            else
+            {
+                dict = Unpack(server);
+
+                rv.Server = new SQRLReponse
+                {
+                    nut = dict.GetOrDefault("nut"),
+                    tif = dict.GetOrDefault("tif"),
+                    qry = dict.GetOrDefault("qry"),
+                    suk = dict.GetOrDefault("suk")
+                };
+            }
 
             return rv;
         }
@@ -91,7 +110,7 @@ namespace mikevh.sqrl
             return rv;
         }
 
-        public static string LoginLink(string ipaddress, bool isURLClick = true) => "sqrl/auth?nut=" + MakeNut(ipaddress, isURLClick);
+        public static string LoginLink(string ipaddress, string nut = null, bool isURLClick = true) => "sqrl/auth?nut=" + (nut ?? MakeNut(ipaddress, isURLClick));
 
         public static string UTF8String(this byte[] bytes) => Encoding.UTF8.GetString(bytes);
 
@@ -121,7 +140,7 @@ namespace mikevh.sqrl
             return PublicKeyAuth.VerifyDetached(sig, (client + server).UTF8Bytes(), key);
         }
 
-        public static SQRLReponse ComoseResponse(SQRLRequest req, Func<string,User> getUser, Action<User> saveUser, Action<string,User> loggedIn)
+        public static SQRLReponse ComoseResponse(SQRLRequest req, User user, Func<User,bool> updateUser, Action<User> addUser, Action<string> onCPS, Action<string> nonCPS)
         {
             var resp = new SQRLReponse
             {
@@ -134,9 +153,8 @@ namespace mikevh.sqrl
                 return resp;
             }
 
-            var user = getUser(req.idk);
             resp.tif = (user == null ? SQRLReponse.TIF.ips_match : SQRLReponse.TIF.ips_match | SQRLReponse.TIF.id_match).ToHex();
-            resp.qry = "/sqrl/auth?nut=" + resp.nut;
+            resp.qry = $"/sqrl/auth?nut={resp.nut}";
 
             switch (req.cmd)
             {
@@ -152,18 +170,30 @@ namespace mikevh.sqrl
                             vuk = req.vuk,
                             CreatedOn = DateTime.Now,
                         };
+                        addUser(user);
                     }
                     else
                     {
                         user.LoginCount++;
                         user.LastLoggedIn = DateTime.Now;
-                        resp.suk = user.suk;
+                        updateUser(user);
                     }
-                    saveUser(user);
-                    loggedIn("CPS" + resp.nut, user);
-
+                    if(req.opt.Contains("cps")) // todo: add server config option to disable cps
+                    {
+                        onCPS(resp.nut);
+                    }
+                    else
+                    {
+                        nonCPS(resp.nut);
+                    }
+                    
                     resp.tif = (SQRLReponse.TIF.id_match | SQRLReponse.TIF.ips_match).ToHex();
                     
+                    if(req.ins != null && req.btn != 0)
+                    {
+
+                    }
+
                     return resp;
                 default:
                     throw new NotImplementedException();

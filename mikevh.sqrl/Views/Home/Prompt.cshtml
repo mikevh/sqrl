@@ -1,0 +1,7 @@
+﻿@model mikevh.sqrl.Controllers.PromptVM
+
+<p><a href="@Model.AskLink" encoded-sqrl-url="@Model.EncodedAskLink" onclick="sqrlLinkClick(this); return true;">Ask</a></p>
+
+@section Scripts {
+    <script src="~/js/sqrl.js"></script>
+}

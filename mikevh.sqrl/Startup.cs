@@ -35,11 +35,11 @@ namespace mikevh.sqrl
             });
             services.AddSQRL(o => 
             {
-                o.LoginPath = "/sqrl/auth";
                 o.CPSPath = (ctx, nut) => $"{ctx.Request.Scheme}://{ctx.Request.Host.Value}/account/CPS?nut={nut}";
+                //o.Answer = (question, answer) => 
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddScoped<IUserRepo, UserRepo>();
+            services.AddScoped(typeof(IUserRepo), provider => new UserRepo(Configuration.GetConnectionString("default")));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -52,8 +52,6 @@ namespace mikevh.sqrl
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
-            // call use or add sqrl, pass in action for ident action && url for CPS pickup, give them a cookie,
 
             app.UseSQRL();
             app.UseStaticFiles();

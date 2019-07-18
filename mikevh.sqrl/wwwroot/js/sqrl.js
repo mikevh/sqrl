@@ -30,7 +30,7 @@ function checkForChange() {
         setTimeout(checkForChange, 5000);   // see whether the page is visible. If the user is 
         return;								// not viewing the page, check again in 5 seconds.
     }
-    syncQuery.open('GET', 'sync.txt');	// the page is visible, so let's check for any update
+    syncQuery.open('GET', '/sqrl/sync.txt');	// the page is visible, so let's check for any update
     syncQuery.onreadystatechange = function () {
         if (syncQuery.readyState === 4) {
             if (syncQuery.status === 200) {
@@ -46,7 +46,7 @@ function checkForChange() {
     };
     syncQuery.send(); // initiate the query to the 'sync.txt' object.
 }
-//checkForChange();	// launch our background change checking
+checkForChange();	// launch our background change checking
 
 
 // =============================================================================

@@ -1,0 +1,16 @@
+﻿@model mikevh.sqrl.Controllers.AskVM
+    <form asp-controller="Home" asp-action="Ask" method="post">
+        <div class="form-group">
+            <label asp-for="Question"></label>
+            <textarea class="form-control" asp-for="Question"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="Button1"></label>
+            <input type="text" class="form-control" asp-for="Button1" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Button2"></label>
+            <input type="text" class="form-control" asp-for="Button2" />
+        </div>
+        <input type="submit" value="Ask" class="btn btn-primary"/>
+    </form>
