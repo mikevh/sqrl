@@ -42,6 +42,7 @@ namespace mikevh.sqrl.Controllers
 
             var vm = new IndexVM
             {
+                Nut = nut,
                 SQRLLoginLink = $"sqrl://{Request.Host}/{link}"
             };
 
@@ -101,6 +102,14 @@ namespace mikevh.sqrl.Controllers
             return RedirectToAction(nameof(Prompt), new { nut });
         }
 
+        [HttpGet]
+        public IActionResult QRCode(string url)
+        {
+            var b = new byte[] { 0 };
+
+            return File(b, "image/jpeg");
+        }
+
         // render the link with the supplied nut
         [HttpGet]
         public IActionResult Prompt(string nut)
@@ -148,7 +157,9 @@ namespace mikevh.sqrl.Controllers
 
     public class IndexVM
     {
+        public string Nut { get; set; }
         public string SQRLLoginLink { get; set; }
         public string EncodedSQRLURL => SQRL.ToBase64URL(SQRLLoginLink.UTF8Bytes());
+        public string QRCodeImageSrc => "/qr?nut=" + Nut;
     }
 }

@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using mikevh.sqrl.Repos;
+using QRCoder;
 using Sodium; 
 
 namespace mikevh.sqrl
@@ -13,6 +17,26 @@ namespace mikevh.sqrl
     public static class SQRL
     {
         private static uint _nutCounter = 0;
+
+        public static byte[] QRCode(string url, int size)
+        {
+            var gen = new QRCodeGenerator();
+            var data = gen.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+            var qrcode = new QRCode(data);
+            var bitmap = qrcode.GetGraphic(size);
+
+            var sized = new Bitmap(size, size);
+            using(var g = Graphics.FromImage(sized))
+            {
+                g.DrawImage(bitmap, 0, 0, size, size);
+            }
+
+            using(var ms = new MemoryStream())
+            {
+                sized.Save(ms, ImageFormat.Png);
+                return ms.ToArray();
+            }
+        }
 
         public static string MakeNut(string ipaddress, bool isURLClick = true)
         {
@@ -72,7 +96,7 @@ namespace mikevh.sqrl
             };
 
             rv.PublicKey = FromBase64URL(rv.idk);
-            rv.IsValid = ValidateSQRLPost(rv.Signature, vm.Client, vm.Server, rv.PublicKey);
+            rv.IsValid = ValidateSQRLPost(rv.Signature, vm.Client, vm.Server, rv.PublicKey); // todo: validate server portion of the request
             rv.RequestIP = ipAddress;
             rv.Host = host;
 

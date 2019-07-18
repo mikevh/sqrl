@@ -6,6 +6,7 @@
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p><a href="@Model.SQRLLoginLink" encoded-sqrl-url="@Model.EncodedSQRLURL" onclick="sqrlLinkClick(this); return true;" >Login</a></p>
+    <img src="@Model.QRCodeImageSrc"/>
 </div>
 
 @section Scripts {
